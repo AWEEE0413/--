@@ -1,0 +1,41 @@
+import os
+from pydub import AudioSegment
+import sounddevice as sd
+import soundfile as sf
+import keyboard
+from datetime import datetime
+
+def record_audio(duration=10, buffering=44100):
+    # 錄音功能，持續指定的秒數
+    print("Press A to start recording...")
+    keyboard.wait('A')  # Wait for the 'A' key to be pressed
+    print("Recording...")
+    myrecording = sd.rec(int(duration * buffering), samplerate=buffering, channels=2)
+    sd.wait()
+    print("Recording finished")
+    return myrecording
+
+def save_recording(recording, filename):
+    # 將錄音保存為文件
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    wav_file = f"C:\\Users\\kung\\樹洞\\{filename}_{timestamp}.wav"
+    sf.write(wav_file, recording, 44100)
+
+    # Convert the WAV file to MP3
+    audio = AudioSegment.from_wav(wav_file)
+
+    # Normalize the audio to -20 dB
+    normalized_audio = audio.normalize(headroom=20.0)
+    
+    # Increase the volume by 10 dB
+    increased_volume_audio = normalized_audio.apply_gain(10)
+
+
+    mp3_file = f"C:\\Users\\kung\\樹洞\\{filename}_{timestamp}.mp3" 
+    normalized_audio.export(mp3_file, format="mp3", bitrate="320k")
+
+    # Remove the WAV file
+    os.remove(wav_file)
+
+recorded_audio = record_audio(duration=10)
+save_recording(recorded_audio, "recorded_audio")
