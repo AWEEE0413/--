@@ -5,14 +5,20 @@ import soundfile as sf
 import keyboard
 from datetime import datetime
 
+def callback(indata, outdata, frames, time, status):
+    if status:
+        print(status)
+    outdata[:] = indata
+
 def record_audio(duration=10, buffering=44100):
     # 錄音功能，持續指定的秒數
-    print("Press A to start recording...")
+    print("Press A to start recording and monitoring...")
     keyboard.wait('A')  # Wait for the 'A' key to be pressed
-    print("Recording...")
-    myrecording = sd.rec(int(duration * buffering), samplerate=buffering, channels=2)
-    sd.wait()
-    print("Recording finished")
+    print("Recording and monitoring...")
+    with sd.Stream(callback=callback):
+        myrecording = sd.rec(int(duration * buffering), samplerate=buffering, channels=2)
+        sd.wait()
+    print("Recording and monitoring finished")
     return myrecording
 
 def save_recording(recording, filename):
@@ -27,9 +33,8 @@ def save_recording(recording, filename):
     # Normalize the audio to -20 dB
     normalized_audio = audio.normalize(headroom=20.0)
     
-    # Increase the volume by 10 dB
-    increased_volume_audio = normalized_audio.apply_gain(20)
-
+    # Increase the volume
+    increased_volume_audio = normalized_audio.apply_gain(20) # Increase volume by 20 dB
 
     mp3_file = f"C:\\Users\\kung\\樹洞\\{filename}_{timestamp}.mp3" 
     normalized_audio.export(mp3_file, format="mp3", bitrate="320k")
