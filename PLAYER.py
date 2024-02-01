@@ -1,18 +1,19 @@
 import os
 import keyboard
-import pygame  # 需要先安裝 pygame 庫，可以使用 pip install pygame 來安裝
+import pygame
+
+current_song_index = 0  # 用來追蹤當前播放的歌曲
 
 def play_next_song(folder_path):
-    """
-    Plays the next song in the folder.
-    """
+    global current_song_index  # 使用全局變數來追蹤當前播放的歌曲
+
     song_list = os.listdir(folder_path)
     if not song_list:
         print("No songs found in the folder.")
         return
 
-    # 選擇第一首歌曲來播放
-    song_path = os.path.join(folder_path, song_list[0])
+    # 選擇下一首歌曲來播放
+    song_path = os.path.join(folder_path, song_list[current_song_index])
 
     # 在播放下一首歌曲之前顯示歌名
     display_song_name(song_path)
@@ -21,6 +22,9 @@ def play_next_song(folder_path):
     pygame.mixer.init()
     pygame.mixer.music.load(song_path)
     pygame.mixer.music.play()
+
+    # 更新當前歌曲的索引，以便下次播放下一首歌曲
+    current_song_index = (current_song_index + 1) % len(song_list)
 
 def display_song_name(song_path):
     """

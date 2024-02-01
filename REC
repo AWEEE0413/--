@@ -28,7 +28,7 @@ def save_recording(recording, filename):
     normalized_audio = audio.normalize(headroom=20.0)
     
     # Increase the volume by 10 dB
-    increased_volume_audio = normalized_audio.apply_gain(10)
+    increased_volume_audio = normalized_audio.apply_gain(20)
 
 
     mp3_file = f"C:\\Users\\kung\\樹洞\\{filename}_{timestamp}.mp3" 
