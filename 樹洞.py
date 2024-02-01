@@ -58,7 +58,7 @@ def record_audio(duration=10, buffering=44100):
     print("Recording and monitoring finished")
     return myrecording
 
-def save_recording(recording, filename):
+#def save_recording(recording, filename):
     # 將錄音保存為文件
     timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
     wav_file = f"C:\\Users\\kung\\樹洞\\{filename}_{timestamp}.wav"
@@ -78,6 +78,25 @@ def save_recording(recording, filename):
 
     # Remove the WAV file
     os.remove(wav_file)
+def mix_audio(song_path, recording):
+    # Load the song
+    song = AudioSegment.from_file(song_path)
+
+    # Convert the recording to an AudioSegment
+    recording_segment = AudioSegment(
+        recording.tobytes(), 
+        frame_rate=44100,
+        sample_width=recording.dtype.itemsize, 
+        channels=2
+    )
+
+    # Mix the song and the recording
+    mixed = song.overlay(recording_segment)
+
+    # Save the mixed audio
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    mixed.export("mixed_audio.mp3", format="mp3")
+
 
 recorded_audio = record_audio(duration=10)
 save_recording(recorded_audio, "recorded_audio")
