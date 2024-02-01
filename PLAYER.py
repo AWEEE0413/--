@@ -19,6 +19,6 @@ def display_song_name():
     # 顯示歌名的程式碼
     pass
 
-folder_path = r"c:\Users\kung\樹洞\PLAYER"  # Replace with the actual folder path
+folder_path = r"C:\Users\kung\樹洞\PY"  # Replace with the actual folder path
 keyboard.add_hotkey('c', lambda: (play_next_song(folder_path), display_song_name()))
 keyboard.wait('esc')
