@@ -33,6 +33,6 @@ def display_song_name(song_path):
     song_name = os.path.basename(song_path)
     print("Now playing: ", song_name)
 
-folder_path = "C:\\Users\\kung\\樹洞\\PY"  # Replace with the actual folder path
+folder_path = "C:\\Users\\kung\\Documents\\treehall\\--\\RECSOURCE"  # Replace with the actual folder path
 keyboard.add_hotkey('c', lambda: play_next_song(folder_path))
 keyboard.wait('esc')

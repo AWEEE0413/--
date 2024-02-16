@@ -37,7 +37,7 @@ def display_song_name(song_path):#顯示歌名
     song_name = os.path.basename(song_path)
     print("Now playing: ", song_name)
 
-folder_path = "C:\\Users\\kung\\樹洞\\PY"  # Replace with the actual folder path
+folder_path = "C:\\Users\\kung\\Documents\\treehall\\--\\RECSOURCE"  # Replace with the actual folder path
 keyboard.add_hotkey('c', lambda: play_next_song(folder_path))
 keyboard.wait('esc')
 
@@ -52,13 +52,14 @@ def record_audio(duration=10, buffering=44100):
     print("Press A to start recording and monitoring...")
     keyboard.wait('A')  # Wait for the 'A' key to be pressed
     print("Recording and monitoring...")
+    
     with sd.Stream(callback=callback):
         myrecording = sd.rec(int(duration * buffering), samplerate=buffering, channels=2)
         sd.wait()
     print("Recording and monitoring finished")
     return myrecording
 
-#def save_recording(recording, filename):
+def save_recording(recording, filename):
     # 將錄音保存為文件
     timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
     wav_file = f"C:\\Users\\kung\\樹洞\\{filename}_{timestamp}.wav"
