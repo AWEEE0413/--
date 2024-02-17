@@ -1,38 +1,37 @@
-import os
-import keyboard
-import pygame
+import pygame  # 引入 pygame 庫，用於遊戲和多媒體應用的開發
+import keyboard  # 引入 keyboard 庫，用於檢測鍵盤事件
+import time  # 引入 time 庫，用於時間相關的操作
+import os  # 引入 os 庫，用於操作系統相關的功能，如檔案和目錄操作
 
-current_song_index = 0  # 用來追蹤當前播放的歌曲
+pygame.init()  # 初始化 pygame 庫
 
-def play_next_song(folder_path):
-    global current_song_index  # 使用全局變數來追蹤當前播放的歌曲
+folder_path = "C:\\Users\\kung\\Documents\\treehall\\--\\RECSOURCE"  # 指定音樂檔案的路徑
 
-    song_list = os.listdir(folder_path)
-    if not song_list:
-        print("No songs found in the folder.")
-        return
+# 從指定的資料夾中找出所有的 mp3 檔案
+songs = [os.path.join(folder_path, f) for f in os.listdir(folder_path) if f.endswith('.mp3')]
+current_song_index = 0  # 設定當前播放的歌曲索引為 0
 
-    # 選擇下一首歌曲來播放
-    song_path = os.path.join(folder_path, song_list[current_song_index])
+def play_song(song):  # 定義一個函數用於播放指定的歌曲
+    pygame.mixer.music.load(song)  # 加載歌曲
+    pygame.mixer.music.play()  # 播放歌曲
 
-    # 在播放下一首歌曲之前顯示歌名
-    display_song_name(song_path)
+def play_next_song():  # 定義一個函數用於播放下一首歌曲
+    global current_song_index  # 使用 global 關鍵字來指示 current_song_index 是一個全局變量
+    current_song_index = (current_song_index + 1) % len(songs)  # 計算下一首歌曲的索引
+    play_song(songs[current_song_index])  # 播放下一首歌曲
 
-    # 播放下一首歌曲的程式碼
-    pygame.mixer.init()
-    pygame.mixer.music.load(song_path)
-    pygame.mixer.music.play()
+def setup_music_end_event():  # 定義一個函數用於設定音樂結束事件
+    pygame.mixer.music.set_endevent(pygame.USEREVENT)  # 當一首歌曲播放結束時，pygame 會觸發一個 USEREVENT 事件
+    pygame.event.set_allowed(pygame.USEREVENT)  # 允許 USEREVENT 事件被觸發
 
-    # 更新當前歌曲的索引，以便下次播放下一首歌曲
-    current_song_index = (current_song_index + 1) % len(song_list)
 
-def display_song_name(song_path):
-    """
-    Displays the name of the current song.
-    """
-    song_name = os.path.basename(song_path)
-    print("Now playing: ", song_name)
+setup_music_end_event()  # 設定音樂結束事件
 
-folder_path = "C:\\Users\\kung\\Documents\\treehall\\--\\RECSOURCE"  # Replace with the actual folder path
-keyboard.add_hotkey('c', lambda: play_next_song(folder_path))
-keyboard.wait('esc')
+while True:  # 進入無窮迴圈
+    for event in pygame.event.get():  # 從事件隊列中取出所有事件
+        if event.type == pygame.USEREVENT:  # 如果事件的類型是 USEREVENT
+            play_song(songs[current_song_index])  # 歌曲播放結束，重新播放當前歌曲
+
+    if keyboard.is_pressed('p'):  # 如果 'p' 鍵被按下
+        play_next_song()  # 播放下一首歌曲
+        time.sleep(0.2)  # 暫停 0.2 秒，以避免重複快速觸發
