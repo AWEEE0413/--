@@ -22,6 +22,7 @@ def record_audio_thread(duration):
     REC.record_audio(duration)
     logging.debug("录音线程结束")
 
+
 def setup_hotkeys():
     song = "path/to/your/song.mp3"
     logging.debug("设置快捷键...")
@@ -33,7 +34,7 @@ def setup_hotkeys():
 
 setup_hotkeys()
 
-logging.info("请按 'P' 键同时开始播放音乐和录音...")
+logging.info("請按 'P' 鍵播放音樂，按 'R' 鍵開始錄音...")
 try:
     while True:
         pass

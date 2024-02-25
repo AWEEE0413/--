@@ -10,7 +10,7 @@ def callback(indata, outdata, frames, time, status):
         print(status)
     outdata[:] = indata
 
-def record_audio(duration=10, buffering=44100):
+def record_audio(duration=30, buffering=44100):
     # 等待 'R' 鍵被按下以開始錄音和實時監聽
     print("按下 'R' 鍵開始錄音和實時監聽...")
     keyboard.wait('R')  # 等待 'R' 鍵
@@ -54,5 +54,5 @@ def save_recording(recording, filename):
     else:
         print("沒有錄音可保存。")
 
-recorded_audio = record_audio(duration=10)
+recorded_audio = record_audio(duration=30)
 save_recording(recorded_audio, "recorded_audio")
