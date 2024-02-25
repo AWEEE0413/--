@@ -1,54 +1,57 @@
-import subprocess
-import threading
+import sys
 import time
-import keyboard
+
+from exec_shell import EndingHook, exec_shell
 
 
-class EndingHook:
-    def __init__(self, next, hook, params=None):
-        self.next = next
-        self.hook = hook
+# Check if the correct number of arguments are provided
+if len(sys.argv) - 1 != 2:
+    print("Usage: python sample.py <param0> <param1>")
+    sys.exit(1)
 
 
-def shell(main_task, event_dist, ending_task):
-    global stop_event
-    stop_event = threading.Event()
-    task_thread = threading.Thread(target=main_task)
-    task_thread.start()
+# sys.argv[0] 為 字串 "sample.py"
+# sys.argv[1] 為 參數 <param0>
+# sys.argv[2] 為 參數 <param1>
 
-    while True:
-        key = keyboard.read_event()
-        if key.name in event_dist:
-            print("    偵測到事件: ", key.name)
-            if event_dist[key.name].hook:
-                event_dist[key.name].hook()
-            print("    執行: ", event_dist[key.name].next)
-            subprocess.Popen(event_dist[key.name].next)
-            break
 
-    stop_event.set()
-    task_thread.join()
-
-    ending_task()
-
-# The following is a sample of how to use the shell function
-
-def main_tast_sample():
-    while not stop_event.is_set():
-        print("執行任務中...")
-        time.sleep(1)
-    print("任務已停止")
+# 主任務函數示例
+def main_task_sample():
+    print("開始執行主任務..., 參數為:", sys.argv[1], sys.argv[2])
+    time.sleep(10)  # 模擬長時間執行的任務
+    print("主任務完成")
 
 
 def ending_task_sample():
     print("程式結束")
+    print("=====================================")
+
 
 def r_hook():
-    print("執行 r 鈎子")
+    print("        執行 r 鈎子")
+
+
+def f_hook():
+    print("        執行 f 鈎子")
+
+
+def s_hook():
+    print("        執行 s 鈎子: program terminated by 's'.")
 
 
 def main():
-    shell(main_tast_sample, {"r": EndingHook("python3 sample.py", r_hook)}, ending_task_sample)
+    exec_shell(
+        main_task_sample,
+        {
+            "r": EndingHook("python3 sample.py r 21341234", r_hook),
+            "f": EndingHook("python3 sample.py f 343242", f_hook),
+            "v": EndingHook(
+                "python3 sample.py v wqerqwe", None
+            ),  # if you don't want to run any hook
+            "s": EndingHook(None, None),  # if you want to exit the program
+        },
+        EndingHook(None, ending_task_sample),
+    )
 
 
 if __name__ == "__main__":
