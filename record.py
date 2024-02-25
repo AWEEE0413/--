@@ -12,7 +12,8 @@ from datetime import datetime
 import os
 from pydub import AudioSegment
 import sys
-from choose import selected_song, get_selected_song
+from choose import play_song
+
 
 
 # 初始化 Pygame
@@ -51,8 +52,7 @@ def start_recording():
     recording = True
 
     # 使用選擇的歌曲路徑進行後續操作
-    pygame.mixer.music.load(selected_song)
-    pygame.mixer.music.play()
+    play_song()
 
     # 播放音樂的同時，播放錄音
     stream = p.open(format=FORMAT,
@@ -104,15 +104,15 @@ stream = p.open(format=FORMAT,
                 stream_callback=callback)
 stream.start_stream()
 
-
-import os
-
+'''
+#檢查selected_song是否有效
 if os.path.isfile(selected_song):
     mix_and_save(recorded_audio, selected_song)
 else:
     print(f"{selected_song} is not a valid file path.")
+'''
 
-'''def mix_and_save(recorded_audio, selected_song):
+def mix_and_save(recorded_audio, selected_song):
     
     # 生成時間戳記作為檔名
     timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
@@ -140,7 +140,7 @@ else:
 
     # 刪除 WAV 檔案
     # os.remove(mixed_audio_path)
-'''
+
 # 主迴圈
 running = True
 while running:
@@ -156,4 +156,6 @@ while running:
 
 # 關閉 Pygame
 pygame.quit()
+
+
 

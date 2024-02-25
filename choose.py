@@ -2,6 +2,7 @@ import pygame
 import time
 import os
 import sys
+import subprocess
 
 # 初始化 Pygame
 pygame.init()
@@ -27,7 +28,7 @@ def play_song():
 # 選擇歌曲
 def select_song(index):
     global selected_song_index, selected_song, song_selected
-    selected_song_index = index 
+    selected_song_index = index
     selected_song = os.path.join(music_folder, songs[selected_song_index])
     print(f"Selected song: {selected_song}")
     play_song()
@@ -62,9 +63,12 @@ while running:
                 select_song(4)
             elif event.key == pygame.K_6:
                 select_song(5)
-            elif event.key == pygame.K_r and song_selected  and pygame.display.get_init():  # 檢查視頻系統是否初始化  # 只有在歌曲已選擇的情況下才處理R按鈕
-                # 開啟下一個程式並關閉當前pygame
-                os.system("record.py")
+            elif event.key == pygame.K_r and song_selected  :  # 檢查視頻系統是否初始化 pygame.display.get_init()  # 只有在歌曲已選擇的情況下才處理R按鈕
+                # 開啟下一個程式並關閉當前pygame    os.system("record.py")
+                subprocess.Popen(["python3", "record.py", selected_song])
                 pygame.quit()
 # 關閉 Pygame
 pygame.quit()
+
+
+
