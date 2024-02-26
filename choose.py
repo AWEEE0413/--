@@ -20,10 +20,22 @@ selected_song_index = None
 selected_song = None
 song_selected = False  # 用於追蹤是否已經選擇了歌曲
 
+
 # 播放所選擇的歌曲
 def play_song():
     pygame.mixer.music.load(selected_song)
     pygame.mixer.music.play()
+    if not os.path.exists(selected_song):
+        print(f"Error: {selected_song} does not exist.")
+
+
+# 在使用前檢查 selected_song 的值和路徑
+if selected_song:
+    print(f"Selected song: {selected_song}")
+    play_song(selected_song)
+else:
+    print("Error: selected_song is not set.")
+
 
 # 選擇歌曲
 def select_song(index):
@@ -33,7 +45,9 @@ def select_song(index):
     print(f"Selected song: {selected_song}")
     play_song()
     song_selected = True  # 設置歌曲已選擇
-'''
+
+
+"""
 def get_selected_song():
     # 在這裡返回選擇的歌曲路徑
     return selected_song
@@ -43,7 +57,8 @@ def play_next_song():
     global selected_song_index
     selected_song_index = (selected_song_index + 1) % len(songs)
     select_song(selected_song_index)
-'''
+"""
+
 
 # 主迴圈
 def main_loop():
@@ -67,6 +82,7 @@ def main_loop():
                 elif event.key == pygame.K_6:
                     select_song(5)
                 elif event.key == pygame.K_r and song_selected:
+                    print(selected_song)
                     # 開啟 record.py
                     subprocess.Popen(["python3", "record.py", selected_song])
                     # 退出 Pygame
@@ -77,11 +93,10 @@ def main_loop():
         # 更新視窗
         pygame.display.flip()
 
+
 # 呼叫主迴圈
 if __name__ == "__main__":
     main_loop()
 
 # 關閉 Pygame
 pygame.quit()
-
-

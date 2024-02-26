@@ -5,6 +5,7 @@ Recording(audio_filename)
         done -> Previewing(audio_filename, mixed_filename)
 
 """
+
 import pygame
 import pyaudio
 import wave
@@ -15,7 +16,6 @@ import sys
 from choose import play_song
 
 
-
 # 初始化 Pygame
 pygame.init()
 pygame.display.init()
@@ -23,7 +23,7 @@ pygame.display.init()
 # 設定視窗大小
 WINDOW_WIDTH, WINDOW_HEIGHT = 800, 600
 window_surface = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-pygame.display.set_caption('Recording Game')
+pygame.display.set_caption("Recording Game")
 
 # 初始化 PyAudio
 p = pyaudio.PyAudio()
@@ -33,129 +33,110 @@ CHUNK = 1024
 FORMAT = pyaudio.paInt16
 CHANNELS = 2
 RATE = 44100
-RECORD_SECONDS = 30  # 預設錄音時間為 30 秒
-
-# 創建音樂播放器
-pygame.mixer.init()
-
-# 初始化變數
-points = 0
-recording = False
-recorded_audio = None
-
-# 設定按鍵
-R_KEY = pygame.K_r
+RECORD_SECONDS = 30
 
 # 開始錄音
-def start_recording():
-    global recording
-    recording = True
+stream = p.open(
+    format=FORMAT, channels=CHANNELS, rate=RATE, input=True, frames_per_buffer=CHUNK
+)
+# 撥放歌曲
 
-    # 使用選擇的歌曲路徑進行後續操作
-    play_song()
+# 開始錄音後播放歌曲
+import sys
 
-    # 播放音樂的同時，播放錄音
-    stream = p.open(format=FORMAT,
-                    channels=CHANNELS,
-                    rate=RATE,
-                    output=True)
-    stream.write(recorded_audio)
+# 获取选定的歌曲路径
+selected_song = sys.argv[1]
 
-    # 等待音樂播放完畢
-    while pygame.mixer.music.get_busy():
-        pygame.time.Clock().tick(10)
-
-    # 停止錄音
-    stream.stop_stream()
-    stream.close()
-
-    stream = p.open(format=FORMAT,
-                    channels=CHANNELS,
-                    rate=RATE,
-                    input=True,
-                    output=True,
-                    frames_per_buffer=CHUNK,
-                    stream_callback=callback)
-    frames = []
-    stream.start_stream()
-    return stream, frames
+# 使用选定的歌曲路径进行后续操作
+pygame.mixer.music.load(selected_song)
+pygame.mixer.music.play()
+print("* 開始錄音")
 
 frames = []
 
-# 處理音訊流的 callback 函式
-def callback(in_data, frame_count, time_info, status):
-    global frames
-    frames.append(in_data)  # 將讀取的音訊加入 frames 中
-    return in_data, pyaudio.paContinue
+# 開始錄音時間
+start_time = pygame.time.get_ticks()
 
-# 在播放音樂的地方初始化 music_stream
-music_stream = p.open(format=FORMAT,
-                      channels=CHANNELS,
-                      rate=RATE,
-                      output=True)
-music_stream.start_stream()
+# 監聽按鍵事件
+recording = True
+while recording:
+    current_time = pygame.time.get_ticks()
+    elapsed_time = (current_time - start_time) / 1000  # 轉換為秒
 
-# 在錄音的地方初始化 stream
-stream = p.open(format=FORMAT,
-                channels=CHANNELS,
-                rate=RATE,
-                input=True,
-                frames_per_buffer=CHUNK,
-                stream_callback=callback)
-stream.start_stream()
+    print(f"已錄音時長：{elapsed_time} 秒")
 
-'''
-#檢查selected_song是否有效
-if os.path.isfile(selected_song):
-    mix_and_save(recorded_audio, selected_song)
-else:
-    print(f"{selected_song} is not a valid file path.")
-'''
-
-def mix_and_save(recorded_audio, selected_song):
-    
-    # 生成時間戳記作為檔名
-    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-
-    # 保存混音結果為 WAV
-    output_wav_folder = "output_wav"
-    if not os.path.exists(output_wav_folder):
-        os.makedirs(output_wav_folder)
-    mixed_audio_path = f"{output_wav_folder}/mixed_audio_{timestamp}.wav"
-    mixed_audio = pygame.mixer.music.get_pos()
-    wf = wave.open(mixed_audio_path, 'wb')
-    wf.setnchannels(CHANNELS)
-    wf.setsampwidth(p.get_sample_size(FORMAT))
-    wf.setframerate(RATE)
-    wf.writeframes(mixed_audio)
-    wf.close()
-
-    # 保存混音結果為 MP3
-    output_mp3_folder = "output_mp3"
-    if not os.path.exists(output_mp3_folder):
-        os.makedirs(output_mp3_folder)
-    mixed_audio_mp3_path = f"{output_mp3_folder}/mixed_audio_{timestamp}.mp3"
-    mixed_audio_wav = AudioSegment.from_wav(mixed_audio_path)
-    mixed_audio_wav.export(mixed_audio_mp3_path, format="mp3")
-
-    # 刪除 WAV 檔案
-    # os.remove(mixed_audio_path)
-
-# 主迴圈
-running = True
-while running:
     for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        elif event.type == pygame.KEYDOWN:
-            if event.key == R_KEY:
-                recorded_audio = start_recording()
-                #mix_and_save(recorded_audio, selected_song)
-    # 更新視窗
-    pygame.display.flip()
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_r:  # 按下 r 鍵停止錄音
+                recording = False
+
+    if elapsed_time >= RECORD_SECONDS:
+        recording = False
+    data = stream.read(CHUNK)
+    frames.append(data)
+
+    # 顯示已錄音的時間
+    window_surface.fill((0, 0, 0))  # 清除畫面
+    font = pygame.font.SysFont(None, 36)
+    text = font.render(f"recording：{elapsed_time:.1f} s", True, (255, 255, 255))
+    text_rect = text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
+    window_surface.blit(text, text_rect)  # 顯示文字
+    pygame.display.update()  # 更新視窗
+
+
+print("* 錄音結束")
+
+# 停止錄音
+stream.stop_stream()
+stream.close()
+
+# 保存錄音結果為 WAV 文件
+# 生成時間戳記作為檔名
+timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+
+# 保存混音結果為 WAV
+mixed_audio = b"".join(frames)
+wav_output_folder = "output_wav"
+if not os.path.exists(wav_output_folder):
+    os.makedirs(wav_output_folder)
+mixed_audio_path = f"{wav_output_folder}/mixed_audio_{timestamp}.wav"
+wf = wave.open(mixed_audio_path, "wb")
+wf.setnchannels(CHANNELS)
+wf.setsampwidth(p.get_sample_size(FORMAT))
+wf.setframerate(RATE)
+wf.writeframes(mixed_audio)
+wf.close()
+
+# 将 WAV 文件转换为 MP3 文件
+mp3_output_folder = "output_mp3"
+if not os.path.exists(mp3_output_folder):
+    os.makedirs(mp3_output_folder)
+mixed_audio_mp3_path = f"{mp3_output_folder}/mixed_audio_{timestamp}.mp3"
+mixed_audio_wav = AudioSegment.from_wav(mixed_audio_path)
+mixed_audio_wav.export(mixed_audio_mp3_path, format="mp3")
+
+# 載入選擇的歌曲和錄音結果
+selected_song_audio = AudioSegment.from_wav(selected_song)
+recorded_audio = AudioSegment.from_wav(mixed_audio_path)
+
+# 混音
+mixed_audio = selected_song_audio.overlay(recorded_audio)
+
+# 設定輸出資料夾
+output_folder = "output_mp3"
+if not os.path.exists(output_folder):
+    os.makedirs(output_folder)
+
+# 生成時間戳記作為檔名
+timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+
+# 保存混音結果為 MP3
+mixed_audio_mp3_path = f"{output_folder}/mixed_audio_{timestamp}.mp3"
+mixed_audio.export(mixed_audio_mp3_path, format="mp3")
+
+
+# 刪除 WAV 檔案
+# os.remove(mixed_audio_path)
 
 # 關閉 Pygame
 pygame.quit()
-
-
-
