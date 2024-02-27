@@ -29,14 +29,6 @@ def play_song():
         print(f"Error: {selected_song} does not exist.")
 
 
-# 在使用前檢查 selected_song 的值和路徑
-if selected_song:
-    print(f"Selected song: {selected_song}")
-    play_song(selected_song)
-else:
-    print("Error: selected_song is not set.")
-
-
 # 選擇歌曲
 def select_song(index):
     global selected_song_index, selected_song, song_selected

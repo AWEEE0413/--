@@ -6,6 +6,8 @@ Recording(audio_filename)
 
 """
 
+import pydub
+from pydub.effects import normalize
 import pygame
 import pyaudio
 import wave
@@ -39,7 +41,6 @@ RECORD_SECONDS = 30
 stream = p.open(
     format=FORMAT, channels=CHANNELS, rate=RATE, input=True, frames_per_buffer=CHUNK
 )
-# 撥放歌曲
 
 # 開始錄音後播放歌曲
 import sys
@@ -90,50 +91,53 @@ print("* 錄音結束")
 stream.stop_stream()
 stream.close()
 
-# 保存錄音結果為 WAV 文件
+
 # 生成時間戳記作為檔名
 timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
 
-# 保存混音結果為 WAV
-mixed_audio = b"".join(frames)
+
+record_audio = b"".join(frames)
+# 增加降噪效果
+# normalize  record_audio = normalize(record_audio)
+
+
+# 保存錄音結果為 WAV 文件
 wav_output_folder = "output_wav"
 if not os.path.exists(wav_output_folder):
     os.makedirs(wav_output_folder)
-mixed_audio_path = f"{wav_output_folder}/mixed_audio_{timestamp}.wav"
-wf = wave.open(mixed_audio_path, "wb")
+record_audio_path = f"{wav_output_folder}/record_audio_{timestamp}.wav"
+wf = wave.open(record_audio_path, "wb")
 wf.setnchannels(CHANNELS)
 wf.setsampwidth(p.get_sample_size(FORMAT))
 wf.setframerate(RATE)
-wf.writeframes(mixed_audio)
+wf.writeframes(record_audio)
 wf.close()
 
 # 将 WAV 文件转换为 MP3 文件
 mp3_output_folder = "output_mp3"
 if not os.path.exists(mp3_output_folder):
     os.makedirs(mp3_output_folder)
-mixed_audio_mp3_path = f"{mp3_output_folder}/mixed_audio_{timestamp}.mp3"
-mixed_audio_wav = AudioSegment.from_wav(mixed_audio_path)
-mixed_audio_wav.export(mixed_audio_mp3_path, format="mp3")
+record_audio_mp3_path = f"{mp3_output_folder}/record_audio_{timestamp}.mp3"
+record_audio_wav = AudioSegment.from_wav(record_audio_path)
+record_audio_wav.export(record_audio_mp3_path, format="mp3", bitrate="320k")
 
-# 載入選擇的歌曲和錄音結果
-selected_song_audio = AudioSegment.from_wav(selected_song)
-recorded_audio = AudioSegment.from_wav(mixed_audio_path)
+# 載入選擇的歌曲和錄音結果 都是 MP3
+selected_song_audio = AudioSegment.from_mp3(selected_song)
+recorded_audio = AudioSegment.from_mp3(record_audio_mp3_path)
+print(f"Selected song: {selected_song}")
+print(f"Recorded audio: {record_audio_mp3_path}")
 
 # 混音
-mixed_audio = selected_song_audio.overlay(recorded_audio)
+record_audio = recorded_audio.overlay(selected_song_audio)
 
 # 設定輸出資料夾
-output_folder = "output_mp3"
-if not os.path.exists(output_folder):
-    os.makedirs(output_folder)
-
-# 生成時間戳記作為檔名
-timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-
-# 保存混音結果為 MP3
-mixed_audio_mp3_path = f"{output_folder}/mixed_audio_{timestamp}.mp3"
-mixed_audio.export(mixed_audio_mp3_path, format="mp3")
-
+final_output_folder = "final_output_mp3"
+if not os.path.exists(final_output_folder):
+    os.makedirs(final_output_folder)
+mixed_output_mp3_path = (
+    f"{final_output_folder}/mixed_audio_{timestamp}.mp3"  # 保存混音結果為 MP3
+)
+record_audio.export(mixed_output_mp3_path, format="mp3", bitrate="320k")
 
 # 刪除 WAV 檔案
 # os.remove(mixed_audio_path)
