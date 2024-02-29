@@ -38,8 +38,8 @@ def main_task_sample():
     if audio_idx < 0 or audio_idx >= len(mp3_files):
         print(f"Invalid audio index: {audio_idx}")
         return
+    print(mp3_files[audio_idx])
     play_music(mp3_files[audio_idx])
-    print(audio_idx)
 
 
 def main():
