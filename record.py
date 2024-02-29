@@ -6,6 +6,7 @@ Recording(audio_filename)
 
 """
 
+import subprocess
 import pydub
 from pydub.effects import normalize
 import pygame
@@ -70,7 +71,7 @@ while recording:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_r:  # 按下 r 鍵停止錄音
                 recording = False
-
+                subprocess.Popen(["python3", "preview.py", selected_song])
     if elapsed_time >= RECORD_SECONDS:
         recording = False
     data = stream.read(CHUNK)
