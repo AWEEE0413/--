@@ -15,12 +15,14 @@ rec_source_dir = os.path.join(current_dir, "./RECSOURCE")
 
 
 # Check if the correct number of arguments are provided
-if len(sys.argv) - 1 != 1:
+if len(sys.argv) - 1 > 1:
     print("Usage: python choosing.py <audio_idx>")
     print("audio_idx: 0 ~ 5")
     sys.exit(1)
-
-audio_idx = int(sys.argv[1])
+if len(sys.argv) - 1 == 0:
+    audio_idx = 0
+else:
+    audio_idx = int(sys.argv[1])
 
 
 def play_music(file_path):
@@ -37,6 +39,7 @@ def main_task_sample():
         print(f"Invalid audio index: {audio_idx}")
         return
     play_music(mp3_files[audio_idx])
+    print(audio_idx)
 
 
 def main():

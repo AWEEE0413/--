@@ -1,5 +1,5 @@
-.mp3
-.wav
-.pyc
+*.mp3
+*.wav
+*.pyc
 
 __pycache__/
