@@ -17,7 +17,9 @@ import os
 from pydub import AudioSegment
 import sys
 from choose import play_song
-
+import numpy as np
+from pygame.locals import *
+import sounddevice as sd
 
 # 初始化 Pygame
 pygame.init()
@@ -34,17 +36,29 @@ p = pyaudio.PyAudio()
 # 設定錄音參數
 CHUNK = 1024
 FORMAT = pyaudio.paInt16
-CHANNELS = 2
+CHANNELS = 1
 RATE = 44100
 RECORD_SECONDS = 30
 
-# 開始錄音
-stream = p.open(
+
+# 定義 callback 函數
+def callback(in_data, frame_count, time_info, status):
+    # 將音頻數據轉換為 numpy 數組
+    audio_data = np.frombuffer(in_data, dtype=np.int16)
+    # 在這裡處理音頻數據...
+    return (audio_data.tobytes(), pyaudio.paContinue)
+
+
+# 開啟音頻輸出裝置
+stream_out = p.open(format=FORMAT, channels=CHANNELS, rate=RATE, output=True)
+
+# 開啟音頻輸入裝置
+stream_in = p.open(
     format=FORMAT, channels=CHANNELS, rate=RATE, input=True, frames_per_buffer=CHUNK
 )
 
+
 # 開始錄音後播放歌曲
-import sys
 
 # 获取选定的歌曲路径
 selected_song = sys.argv[1]
@@ -52,8 +66,8 @@ selected_song = sys.argv[1]
 # 使用选定的歌曲路径进行后续操作
 pygame.mixer.music.load(selected_song)
 pygame.mixer.music.play()
+# 開始錄音
 print("* 開始錄音")
-
 frames = []
 
 # 開始錄音時間
@@ -74,8 +88,16 @@ while recording:
                 subprocess.Popen(["python3", "preview.py", selected_song])
     if elapsed_time >= RECORD_SECONDS:
         recording = False
-    data = stream.read(CHUNK)
-    frames.append(data)
+    # 讀取音頻數據
+    data = stream_in.read(CHUNK)
+    # 將音頻數據即時輸出到音頻輸出裝置
+    stream_out.write(data)
+
+    # 將音頻數據轉換為 numpy 數組並播放
+    audio_data = np.frombuffer(data, dtype=np.int16)
+    pygame.mixer.music.set_volume(0.5)  # 設定音量
+    sound = pygame.mixer.Sound(audio_data)
+    sound.play()
 
     # 顯示已錄音的時間
     window_surface.fill((0, 0, 0))  # 清除畫面
@@ -89,8 +111,10 @@ while recording:
 print("* 錄音結束")
 
 # 停止錄音
-stream.stop_stream()
-stream.close()
+stream_in.stop_stream()
+stream_out.stop_stream()
+stream_in.close()
+stream_out.close()
 
 
 # 生成時間戳記作為檔名
