@@ -34,7 +34,7 @@ p = pyaudio.PyAudio()
 # 設定錄音參數
 CHUNK = 1024
 FORMAT = pyaudio.paInt16
-CHANNELS = 1
+CHANNELS = 1  # 出現報錯OSError: [Errno -9998] Invalid number of channels 更改通道數
 RATE = 44100
 RECORD_SECONDS = 30
 
