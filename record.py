@@ -34,14 +34,18 @@ p = pyaudio.PyAudio()
 # 設定錄音參數
 CHUNK = 1024
 FORMAT = pyaudio.paInt16
-CHANNELS = 2
+CHANNELS = 1
 RATE = 44100
 RECORD_SECONDS = 30
 
-# 開始錄音
-stream = p.open(
+# 開啟音頻輸出裝置
+stream_out = p.open(format=FORMAT, channels=CHANNELS, rate=RATE, output=True)
+
+# 開啟音頻輸入裝置
+stream_in = p.open(
     format=FORMAT, channels=CHANNELS, rate=RATE, input=True, frames_per_buffer=CHUNK
 )
+
 
 # 開始錄音後播放歌曲
 import sys
@@ -74,7 +78,13 @@ while recording:
                 subprocess.Popen(["python3", "preview.py", selected_song])
     if elapsed_time >= RECORD_SECONDS:
         recording = False
-    data = stream.read(CHUNK)
+    # 讀取音頻數據
+    data = stream_in.read(CHUNK)
+
+    # 將音頻數據即時輸出到音頻輸出裝置
+    stream_out.write(data)
+
+    # 保存錄音數據
     frames.append(data)
 
     # 顯示已錄音的時間
@@ -89,9 +99,10 @@ while recording:
 print("* 錄音結束")
 
 # 停止錄音
-stream.stop_stream()
-stream.close()
-
+stream_out.stop_stream()
+stream_in.stop_stream()
+stream_out.close()
+stream_in.close()
 
 # 生成時間戳記作為檔名
 timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
