@@ -17,7 +17,9 @@ import os
 from pydub import AudioSegment
 import sys
 from choose import play_song
-
+import numpy as np
+from pygame.locals import *
+import sounddevice as sd
 
 # 初始化 Pygame
 pygame.init()
@@ -48,7 +50,6 @@ stream_in = p.open(
 
 
 # 開始錄音後播放歌曲
-import sys
 
 # 获取选定的歌曲路径
 selected_song = sys.argv[1]
@@ -56,8 +57,8 @@ selected_song = sys.argv[1]
 # 使用选定的歌曲路径进行后续操作
 pygame.mixer.music.load(selected_song)
 pygame.mixer.music.play()
+# 開始錄音
 print("* 開始錄音")
-
 frames = []
 
 # 開始錄音時間
@@ -86,7 +87,6 @@ while recording:
 
     # 保存錄音數據
     frames.append(data)
-
     # 顯示已錄音的時間
     window_surface.fill((0, 0, 0))  # 清除畫面
     font = pygame.font.SysFont(None, 36)
@@ -99,10 +99,11 @@ while recording:
 print("* 錄音結束")
 
 # 停止錄音
-stream_out.stop_stream()
 stream_in.stop_stream()
-stream_out.close()
+stream_out.stop_stream()
 stream_in.close()
+stream_out.close()
+
 
 # 生成時間戳記作為檔名
 timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
