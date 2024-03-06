@@ -44,16 +44,16 @@ while previewing:
             if event.key == pygame.K_r:
                 subprocess.Popen(["python3", "record.py", selected_song])
                 # 回到錄音
-                pass
+                pygame.quit()
             elif event.key == pygame.K_e:
                 subprocess.Popen(["python3", "export.py", mixed_filename])
                 # 導出錄音
-                pass
+                pygame.quit()
             elif event.key == pygame.K_p:
                 # replay
                 pygame.mixer.music.load(mixed_filename)
                 pygame.mixer.music.play()
-                pass
             elif event.key == pygame.K_c:
+                subprocess.Popen(["python3", "choose.py"])
                 # 選擇歌曲
-                pass
+                pygame.quit()
