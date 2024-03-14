@@ -35,11 +35,7 @@ CHANNELS = 1
 RATE = 44100
 RECORD_SECONDS = 30
 
-# Open audio stream for output
-stream_out = p.open(format=FORMAT, channels=CHANNELS, rate=RATE, output=True)
-
-# Open audio stream for input
-stream_in = p.open(
+stream = p.open(
     format=FORMAT, channels=CHANNELS, rate=RATE, input=True, frames_per_buffer=CHUNK
 )
 
@@ -70,10 +66,8 @@ def save_recording():
     pygame.display.update()
 
     # Stop audio streams
-    stream_in.stop_stream()
-    stream_out.stop_stream()
-    stream_in.close()
-    stream_out.close()
+    stream.stop_stream()
+    stream.close()
 
     # Save recording as WAV file
     wav_output_folder = "output_wav"
@@ -110,6 +104,13 @@ def mix_audio():
 
 def main_loop():
     recording = True
+    # 播放開始音效
+    pygame.mixer.music.load("hpjwd-axrpe.wav")
+    pygame.mixer.music.play()
+    # 等待音效播放完畢
+    while pygame.mixer.music.get_busy():
+        pygame.time.Clock().tick(10)
+    # 播放音樂
     start_recording()
 
     while recording:
@@ -123,8 +124,8 @@ def main_loop():
         if elapsed_time >= RECORD_SECONDS:
             recording = False
 
-        data = stream_in.read(CHUNK)
-        stream_out.write(data)
+        data = stream(CHUNK)
+        stream.write(data)
         frames.append(data)
 
         # Update window
