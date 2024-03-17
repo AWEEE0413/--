@@ -56,6 +56,14 @@ def play_next_song():
 def main_loop():
     global song_selected
     running = True
+    # 獲取傳遞的索引值
+    if len(sys.argv) > 1:
+        index = int(sys.argv[1])
+        select_song(index)
+        song_selected = True
+    else:
+        index = 0  # 默認值
+        song_selected = False
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -84,7 +92,6 @@ def main_loop():
             play_song()
         # 更新視窗
         pygame.display.flip()
-
 
 # 呼叫主迴圈
 if __name__ == "__main__":

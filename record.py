@@ -13,7 +13,6 @@ import pygame
 import pyaudio
 from datetime import datetime
 from pydub import AudioSegment
-from pydub.effects import normalize
 import subprocess
 
 # Initialize Pygame
@@ -36,15 +35,16 @@ RATE = 44100
 RECORD_SECONDS = 30
 
 # Open audio stream for output
-stream_out = p.open(format=FORMAT, channels=CHANNELS, rate=RATE, output=True)
+stream_out = p.open(format=FORMAT, channels=CHANNELS, rate=RATE, input=True, output=True, frames_per_buffer=CHUNK)
 
 # Open audio stream for input
-stream_in = p.open(
-    format=FORMAT, channels=CHANNELS, rate=RATE, input=True, frames_per_buffer=CHUNK
-)
+# stream_in = p.open(
+#     format=FORMAT, channels=CHANNELS, rate=RATE, input=True, frames_per_buffer=CHUNK
+# )
 
 # Get the selected song path from command line argument
 selected_song = sys.argv[1]
+
 
 
 def start_recording():
@@ -70,9 +70,9 @@ def save_recording():
     pygame.display.update()
 
     # Stop audio streams
-    stream_in.stop_stream()
+    #stream_in.stop_stream()
+    #stream_in.close()
     stream_out.stop_stream()
-    stream_in.close()
     stream_out.close()
 
     # Save recording as WAV file
@@ -110,6 +110,11 @@ def mix_audio():
 
 def main_loop():
     recording = True
+    #開始音效路徑
+    pygame.mixer.music.load("start.mp3")
+    pygame.mixer.music.play()
+    while pygame.mixer.music.get_busy():
+        pygame.time.Clock().tick(10)
     start_recording()
 
     while recording:
@@ -123,7 +128,7 @@ def main_loop():
         if elapsed_time >= RECORD_SECONDS:
             recording = False
 
-        data = stream_in.read(CHUNK)
+        data = stream_out.read(CHUNK)
         stream_out.write(data)
         frames.append(data)
 
