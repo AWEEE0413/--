@@ -110,11 +110,13 @@ def mix_audio():
 
 def main_loop():
     recording = True
-    #開始音效路徑
-    pygame.mixer.music.load("start.mp3")
+    # 播放開始音效
+    pygame.mixer.music.load("hpjwd-axrpe.wav")
     pygame.mixer.music.play()
+    # 等待音效播放完畢
     while pygame.mixer.music.get_busy():
         pygame.time.Clock().tick(10)
+    # 播放音樂
     start_recording()
 
     while recording:
