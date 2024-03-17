@@ -37,24 +37,24 @@ while exporting:
             if event.key == pygame.K_1:
                 # 回到選擇並回傳按鍵值給index
                 subprocess.Popen(["python3", "choose.py", "0"])
-                pygame.quit()
+                exporting = False
             elif event.key == pygame.K_2:
                 subprocess.Popen(["python3", "choose.py", "1"])
                 # 選擇歌曲
-                pygame.quit()
+                exporting = False
             elif event.key == pygame.K_3:
                 subprocess.Popen(["python3", "choose.py", "2"])
                 # 選擇歌曲
-                pygame.quit()
+                exporting = False
             elif event.key == pygame.K_4:
                 subprocess.Popen(["python3", "choose.py", "3"])
                 # 選擇歌曲
-                pygame.quit()
+                exporting = False
             elif event.key == pygame.K_5:
                 subprocess.Popen(["python3", "choose.py", "4"])
                 # 選擇歌曲
-                pygame.quit()
+                exporting = False
             elif event.key == pygame.K_6:
                 subprocess.Popen(["python3", "choose.py", "5"])
                 # 選擇歌曲
-                pygame.quit()
+                exporting = False

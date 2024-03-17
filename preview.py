@@ -42,8 +42,6 @@ while previewing:
             previewing = False
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_r:
-                #移除混音後的音頻文件
-                os.remove(mixed_filename)
                 # 回到錄音
                 subprocess.Popen(["python3", "record.py", selected_song])
                 previewing = False
@@ -56,27 +54,25 @@ while previewing:
                 pygame.mixer.music.load(mixed_filename)
                 pygame.mixer.music.play()
             elif event.key == pygame.K_1:
-                # 回到選擇並回傳按鍵值給index
+                #回到選擇並回傳按鍵值給index
                 subprocess.Popen(["python3", "choose.py", "0"])
-                pygame.quit()
+                previewing = False
             elif event.key == pygame.K_2:
                 subprocess.Popen(["python3", "choose.py", "1"])
                 # 選擇歌曲
-                pygame.quit()
+                previewing = False
             elif event.key == pygame.K_3:
                 subprocess.Popen(["python3", "choose.py", "2"])
                 # 選擇歌曲
-                pygame.quit()
+                previewing = False
             elif event.key == pygame.K_4:
                 subprocess.Popen(["python3", "choose.py", "3"])
                 # 選擇歌曲
-                pygame.quit()
+                previewing = False
             elif event.key == pygame.K_5:
                 subprocess.Popen(["python3", "choose.py", "4"])
                 # 選擇歌曲
-                pygame.quit()
+                previewing = False
             elif event.key == pygame.K_6:
                 subprocess.Popen(["python3", "choose.py", "5"])
-                # 選擇歌曲
-                subprocess.Popen(["python3", "choose.py"])
                 previewing = False
