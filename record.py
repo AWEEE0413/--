@@ -131,7 +131,6 @@ def main_loop():
             recording = False
 
         data = stream_out.read(CHUNK)
-        stream_out.write(data)
         frames.append(data)
 
         # Update window
