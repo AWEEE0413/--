@@ -11,6 +11,7 @@ import sys
 import wave
 import pygame
 import pyaudio
+import alsaaudio
 from datetime import datetime
 from pydub import AudioSegment
 import subprocess
@@ -29,7 +30,7 @@ p = pyaudio.PyAudio()
 
 # Set recording parameters
 CHUNK = 1024
-FORMAT = pyaudio.paInt16
+FORMAT = alsaaudio.PCM_FORMAT_S16_LE
 CHANNELS = 1
 RATE = 44100
 RECORD_SECONDS = 30

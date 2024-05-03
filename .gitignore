@@ -1,4 +1,6 @@
 *.mp3
 *.wav
 *.pyc
-__pycache__
+pycache/
+venv/
+test.py
