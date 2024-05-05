@@ -25,19 +25,18 @@ WINDOW_WIDTH, WINDOW_HEIGHT = 800, 600
 window_surface = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 pygame.display.set_caption("Recording Game")
 
-# Initialize PyAudio
-p = pyaudio.PyAudio()
 
 # Set recording parameters
-CHUNK = 1024
-FORMAT = alsaaudio.PCM_FORMAT_S16_LE
-CHANNELS = 1
-RATE = 44100
+device = 'default'
+channels = 1
+rate = 44100
+format = alsaaudio.PCM_FORMAT_S16_LE
+periodsize = 1024
 RECORD_SECONDS = 30
 
 # Open audio stream for output
-stream_out = p.open(format=FORMAT, channels=CHANNELS, rate=RATE, input=True, output=True, frames_per_buffer=CHUNK)
-
+stream_out = alsaaudio.PCM(alsaaudio.PCM_CAPTURE, alsaaudio.PCM_NORMAL,
+                         channels=channels, rate=rate, format=format, periodsize=periodsize)
 # Open audio stream for input
 # stream_in = p.open(
 #     format=FORMAT, channels=CHANNELS, rate=RATE, input=True, frames_per_buffer=CHUNK
@@ -131,7 +130,7 @@ def main_loop():
         if elapsed_time >= RECORD_SECONDS:
             recording = False
 
-        data = stream_out.read(CHUNK)
+        data = stream_out.read()
         frames.append(data)
 
         # Update window
