@@ -14,7 +14,7 @@ win = pygame.display.set_mode((200, 200))
 pygame.display.set_caption("Select Song")
 
 # 設置資料夾路徑和歌曲列表
-music_folder = "C:./RECSOURCE"
+music_folder = "./RECSOURCE"
 songs = os.listdir(music_folder)[:6]
 selected_song_index = None
 selected_song = None

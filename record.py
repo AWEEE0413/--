@@ -5,7 +5,7 @@ Recording(audio_filename)
         done -> Previewing(audio_filename, mixed_filename)
 
 """
-
+import struct
 import os
 import sys
 import wave
@@ -15,6 +15,7 @@ import alsaaudio
 from datetime import datetime
 from pydub import AudioSegment
 import subprocess
+import alsaaudio
 
 # Initialize Pygame
 pygame.init()
@@ -35,8 +36,7 @@ periodsize = 1024
 RECORD_SECONDS = 30
 
 # Open audio stream for output
-stream_out = alsaaudio.PCM(alsaaudio.PCM_CAPTURE, alsaaudio.PCM_NORMAL,
-                         channels=channels, rate=rate, format=format, periodsize=periodsize)
+audio_in = alsaaudio.PCM(alsaaudio.PCM_CAPTURE, alsaaudio.PCM_NONBLOCK, device)
 # Open audio stream for input
 # stream_in = p.open(
 #     format=FORMAT, channels=CHANNELS, rate=RATE, input=True, frames_per_buffer=CHUNK
@@ -69,20 +69,17 @@ def save_recording():
     window_surface.blit(text, text_rect)
     pygame.display.update()
 
-    # Stop audio streams
-    #stream_in.stop_stream()
-    #stream_in.close()
-    stream_out.stop_stream()
-    stream_out.close()
+    #close audio streams
+    audio_in.close()
 
     # Save recording as WAV file
     wav_output_folder = "output_wav"
     os.makedirs(wav_output_folder, exist_ok=True)
     record_audio_path = f"{wav_output_folder}/record_audio_{timestamp}.wav"
     wf = wave.open(record_audio_path, "wb")
-    wf.setnchannels(CHANNELS)
-    wf.setsampwidth(p.get_sample_size(FORMAT))
-    wf.setframerate(RATE)
+    wf.setnchannels(channels)
+    wf.setsampwidth(2)
+    wf.setframerate(rate)
     wf.writeframes(b"".join(frames))
     wf.close()
 
@@ -111,8 +108,8 @@ def mix_audio():
 def main_loop():
     recording = True
     # 播放開始音效
-    pygame.mixer.music.load("hpjwd-axrpe.wav")
-    pygame.mixer.music.play()
+    #pygame.mixer.music.load("hpjwd-axrpe.wav")
+    #pygame.mixer.music.play()
     # 等待音效播放完畢
     while pygame.mixer.music.get_busy():
         pygame.time.Clock().tick(10)
@@ -130,8 +127,10 @@ def main_loop():
         if elapsed_time >= RECORD_SECONDS:
             recording = False
 
-        data = stream_out.read()
-        frames.append(data)
+        data = audio_in.read()
+        print(data[:10])
+        if data:
+            frames.append(data)
 
         # Update window
         window_surface.fill((0, 0, 0))
