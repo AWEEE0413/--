@@ -36,11 +36,8 @@ periodsize = 1024
 RECORD_SECONDS = 30
 
 # Open audio stream for output
-audio_in = alsaaudio.PCM(alsaaudio.PCM_CAPTURE, alsaaudio.PCM_NONBLOCK, device)
-# Open audio stream for input
-# stream_in = p.open(
-#     format=FORMAT, channels=CHANNELS, rate=RATE, input=True, frames_per_buffer=CHUNK
-# )
+audio_in = alsaaudio.PCM(alsaaudio.PCM_CAPTURE, alsaaudio.PCM_NORMAL,
+                         channels=channels, rate=rate, format=format, periodsize=periodsize)
 
 # Get the selected song path from command line argument
 selected_song = sys.argv[1]
@@ -119,7 +116,7 @@ def main_loop():
     while recording:
         current_time = pygame.time.get_ticks()
         elapsed_time = (current_time - start_time) / 1000
-
+        frames = []
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
                 recording = False
@@ -127,10 +124,11 @@ def main_loop():
         if elapsed_time >= RECORD_SECONDS:
             recording = False
 
-        data = audio_in.read()
-        print(data[:10])
-        if data:
+        length, data = audio_in.read()
+        print(type(data))
+        if length:
             frames.append(data)
+        print(data[:10],len(frames))
 
         # Update window
         window_surface.fill((0, 0, 0))

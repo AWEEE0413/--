@@ -24,9 +24,10 @@ frames = []
 # 錄音
 for _ in range(rate // periodsize * 5):  # 設定錄製的音訊長度為 5 秒
     length, data = audio_in.read()
-    #print(data[:10])
+    print(type(data))
     if length:
         frames.append(data)
+    #print(data[:10],len(frames))
 
 # 停止錄音
 audio_in.close()
