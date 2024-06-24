@@ -52,7 +52,7 @@ def play_next_song():
 """
 
 
-# 主迴圈
+# 主迴圈 來自PC
 def main_loop():
     global song_selected
     running = True
