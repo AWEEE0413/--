@@ -39,6 +39,7 @@ RECORD_SECONDS = 30
 audio_in = alsaaudio.PCM(alsaaudio.PCM_CAPTURE, alsaaudio.PCM_NORMAL,
                          channels=channels, rate=rate, format=format, periodsize=periodsize)
 
+# Get the selected song path from command line argument
 selected_song = sys.argv[1]
 
 
@@ -116,7 +117,6 @@ def main_loop():
         current_time = pygame.time.get_ticks()
         elapsed_time = (current_time - start_time) / 1000
 
-        '''錄音提前終止
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
                 recording = False
@@ -125,11 +125,10 @@ def main_loop():
         if elapsed_time >= RECORD_SECONDS:
             recording = False
 
-        for _ in range(rate // periodsize * 30):  # 設定錄製的音訊長度為 30 秒
-            length, data = audio_in.read()
-            #print(data[:10])
-            if length:
-                frames.append(data)
+        data = audio_in.read()
+        print(data[:10])
+        if data:
+            frames.append(data)
 
         # Update window
         window_surface.fill((0, 0, 0))
