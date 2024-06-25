@@ -3,18 +3,19 @@ import time
 import os
 import sys
 import subprocess
+import pygame.mixer
+import RPi.GPIO as GPIO
 
-# 初始化 Pygame
-pygame.init()
-# 初始化視訊系統
-pygame.display.init()
+# 初始化 Pygame.mixer
+pygame.mixer.init()
 
-# 設置視窗
-win = pygame.display.set_mode((200, 200))
-pygame.display.set_caption("Select Song")
+# 初始化 GPIO
+GPIO.setmode(GPIO.BCM)
+button_pins = [17, 18, 27, 22, 23, 24, 25]
+GPIO.setup(button_pins, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 # 設置資料夾路徑和歌曲列表
-music_folder = "./RECSOURCE"
+music_folder = "C:./RECSOURCE"
 songs = os.listdir(music_folder)[:6]
 selected_song_index = None
 selected_song = None
@@ -52,46 +53,39 @@ def play_next_song():
 """
 
 
-# 主迴圈 來自PC
+# 主迴圈
 def main_loop():
     global song_selected
     running = True
-    # 獲取傳遞的索引值
+    index = 0  # 默认值
+
     if len(sys.argv) > 1:
         index = int(sys.argv[1])
         select_song(index)
         song_selected = True
-    else:
-        index = 0  # 默認值
-        song_selected = False
+
     while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_1:
-                    select_song(0)
-                elif event.key == pygame.K_2:
-                    select_song(1)
-                elif event.key == pygame.K_3:
-                    select_song(2)
-                elif event.key == pygame.K_4:
-                    select_song(3)
-                elif event.key == pygame.K_5:
-                    select_song(4)
-                elif event.key == pygame.K_6:
-                    select_song(5)
-                elif event.key == pygame.K_r and song_selected:
-                    print(selected_song)
-                    # 開啟 record.py
-                    subprocess.Popen(["python3", "record.py", selected_song])
-                    # 退出 Pygame
-                    pygame.quit()
-                    sys.exit()
-        if pygame.mixer.music.get_busy() == 0 and selected_song is not None:
+        for i, pin in enumerate(button_pins[:6]):
+            if GPIO.input(pin) == GPIO.LOW:
+                select_song(i)
+                song_selected = True
+                time.sleep(0.2)  # 防止按钮抖动
+
+        if song_selected and GPIO.input(button_pins[6]) == GPIO.LOW:  # 检测录音按钮
+            print(selected_song)
+            # 开启 record.py
+            subprocess.Popen(["python3", "record.py", selected_song])
+            running = False
+
+        # 这里添加播放歌曲的逻辑
+        if selected_song:
             play_song()
-        # 更新視窗
-        pygame.display.flip()
+            song_selected = False
+
+        time.sleep(0.1)  # 防止 CPU 占用过高
+
+    # 清理 GPIO 引脚设置
+    GPIO.cleanup()
 
 # 呼叫主迴圈
 if __name__ == "__main__":
