@@ -16,16 +16,16 @@ from datetime import datetime
 from pydub import AudioSegment
 import subprocess
 import alsaaudio
+import RPi.GPIO as GPIO
 
 # Initialize Pygame
 pygame.init()
-pygame.display.init()
+pygame.mixer.init()
 
-# Set window size
-WINDOW_WIDTH, WINDOW_HEIGHT = 800, 600
-window_surface = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-pygame.display.set_caption("Recording Game")
-
+# Initialize GPIO
+GPIO.setmode(GPIO.BCM)
+button_pins = [25]
+GPIO.setup(button_pins, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 # Set recording parameters
 device = 'default'
@@ -33,7 +33,7 @@ channels = 1
 rate = 44100
 format = alsaaudio.PCM_FORMAT_S16_LE
 periodsize = 1024
-RECORD_SECONDS = 30
+
 
 # Open audio stream for output
 audio_in = alsaaudio.PCM(alsaaudio.PCM_CAPTURE, alsaaudio.PCM_NORMAL,
@@ -58,13 +58,6 @@ def start_recording():
 def save_recording():
     print("* 錄音結束...")
     pygame.mixer.music.stop()
-
-    # Display "錄音結束" on the pygame window
-    font = pygame.font.SysFont(None, 36)
-    text = font.render("錄音結束", True, (255, 255, 255))
-    text_rect = text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
-    window_surface.blit(text, text_rect)
-    pygame.display.update()
 
     #close audio streams
     audio_in.close()
@@ -104,6 +97,7 @@ def mix_audio():
 
 def main_loop():
     recording = True
+    RECORD_SECONDS = 30
     # 播放開始音效
     #pygame.mixer.music.load("hpjwd-axrpe.wav")
     #pygame.mixer.music.play()
@@ -116,27 +110,26 @@ def main_loop():
     while recording:
         current_time = pygame.time.get_ticks()
         elapsed_time = (current_time - start_time) / 1000
-
+        print(f"錄音中... {elapsed_time:.2f} 秒")
+        '''
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
                 recording = False
         '''
 
         if elapsed_time >= RECORD_SECONDS:
+            RECORD_SECONDS = 0
             recording = False
+        if GPIO.input(button_pins[0]) == GPIO.LOW:
+            RECORD_SECONDS = 0
+            recording = False
+        
+        for _ in range(rate // periodsize * (RECORD_SECONDS + elapsed_time)):
+                    length, data = audio_in.read()
+                    if length:
+                        frames.append(data)
 
-        data = audio_in.read()
-        print(data[:10])
-        if data:
-            frames.append(data)
-
-        # Update window
-        window_surface.fill((0, 0, 0))
-        font = pygame.font.SysFont(None, 36)
-        text = font.render(f"Recording: {elapsed_time:.1f} s", True, (255, 255, 255))
-        text_rect = text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
-        window_surface.blit(text, text_rect)
-        pygame.display.update()
+        
 
     save_recording()
     mixed_output_mp3_path = mix_audio()

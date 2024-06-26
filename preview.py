@@ -17,13 +17,7 @@ import keyboard
 from datetime import datetime
 
 # 初始化 Pygame
-pygame.init()
-pygame.display.init()
-
-# 設定視窗大小
-WINDOW_WIDTH, WINDOW_HEIGHT = 800, 600
-window_surface = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-pygame.display.set_caption("previewing Game")
+pygame.mixer.init()
 
 # 獲得選定的歌曲路徑
 selected_song = sys.argv[1]
