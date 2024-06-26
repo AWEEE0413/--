@@ -1,22 +1,13 @@
-"""
-Recording(audio_filename)
-        0 -> Choosing(audio_filename)
-        1 -> Recording(audio_filename)
-        done -> Previewing(audio_filename, mixed_filename)
-
-"""
-import struct
 import os
 import sys
 import wave
 import pygame
-import pyaudio
 import alsaaudio
 from datetime import datetime
 from pydub import AudioSegment
 import subprocess
-import alsaaudio
 import RPi.GPIO as GPIO
+import time
 
 # Initialize Pygame
 pygame.init()
@@ -28,21 +19,19 @@ button_pins = [25]
 GPIO.setup(button_pins, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 # Set recording parameters
-device = 'default'
+device = 'plughw:3,0'
 channels = 1
 rate = 44100
 format = alsaaudio.PCM_FORMAT_S16_LE
 periodsize = 1024
 
-
-# Open audio stream for output
+# Open audio stream for input
 audio_in = alsaaudio.PCM(alsaaudio.PCM_CAPTURE, alsaaudio.PCM_NORMAL,
-                         channels=channels, rate=rate, format=format, periodsize=periodsize)
+                         device=device ,channels=channels, rate=rate, format=format, periodsize=periodsize)
+
 
 # Get the selected song path from command line argument
 selected_song = sys.argv[1]
-
-
 
 def start_recording():
     pygame.mixer.music.load(selected_song)
@@ -54,13 +43,9 @@ def start_recording():
     timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
     print("* 開始錄音...")
 
-
 def save_recording():
     print("* 錄音結束...")
     pygame.mixer.music.stop()
-
-    #close audio streams
-    audio_in.close()
 
     # Save recording as WAV file
     wav_output_folder = "output_wav"
@@ -85,7 +70,6 @@ def save_recording():
     selected_song_audio = AudioSegment.from_mp3(selected_song)
     recorded_audio = AudioSegment.from_mp3(record_audio_mp3_path)
 
-
 def mix_audio():
     mixed_audio = recorded_audio.overlay(selected_song_audio)
     final_output_folder = "final_output_mp3"
@@ -94,16 +78,10 @@ def mix_audio():
     mixed_audio.export(mixed_output_mp3_path, format="mp3", bitrate="320k")
     return mixed_output_mp3_path
 
-
 def main_loop():
     recording = True
     RECORD_SECONDS = 30
-    # 播放開始音效
-    #pygame.mixer.music.load("hpjwd-axrpe.wav")
-    #pygame.mixer.music.play()
-    # 等待音效播放完畢
-    while pygame.mixer.music.get_busy():
-        pygame.time.Clock().tick(10)
+
     # 播放音樂
     start_recording()
 
@@ -111,30 +89,25 @@ def main_loop():
         current_time = pygame.time.get_ticks()
         elapsed_time = (current_time - start_time) / 1000
         print(f"錄音中... {elapsed_time:.2f} 秒")
-        '''
-        for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
-                recording = False
-        '''
 
         if elapsed_time >= RECORD_SECONDS:
-            RECORD_SECONDS = 0
             recording = False
         if GPIO.input(button_pins[0]) == GPIO.LOW:
-            RECORD_SECONDS = 0
             recording = False
         
-        for _ in range(rate // periodsize * (RECORD_SECONDS + elapsed_time)):
-                    length, data = audio_in.read()
-                    if length:
-                        frames.append(data)
-
+        length, data = audio_in.read()
+        if length:
+            frames.append(data)
         
+        time.sleep(0.01)  # 加入短暫延遲以減少CPU使用率
 
     save_recording()
     mixed_output_mp3_path = mix_audio()
     subprocess.Popen(["python3", "preview.py", selected_song, mixed_output_mp3_path])
 
+    # Cleanup
+    audio_in.close()
+    GPIO.cleanup()
 
 if __name__ == "__main__":
     main_loop()

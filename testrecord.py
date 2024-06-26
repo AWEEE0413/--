@@ -8,7 +8,7 @@ import wave
 import numpy as np
 
 # 設定錄音參數
-device = 'default'
+device = 'plughw:3,0'
 channels = 1
 rate = 44100
 format = alsaaudio.PCM_FORMAT_S16_LE
@@ -16,7 +16,7 @@ periodsize = 1024
 
 # 開啟音訊輸入
 audio_in = alsaaudio.PCM(alsaaudio.PCM_CAPTURE, alsaaudio.PCM_NORMAL,
-                         channels=channels, rate=rate, format=format, periodsize=periodsize)
+                         device=device ,channels=channels, rate=rate, format=format, periodsize=periodsize)
 print("錄音開始...")
 
 frames = []
