@@ -1,23 +1,20 @@
-"""
-  Previewing(audio_filename, mixed_filename)
-        0 -> Choosing(audio_filename)
-        1 -> Recording(audio_filename)
-        2 -> Exporting(mixed_filename)
-        3 -> Previewing(audio_filename, mixed_filename)
-
-"""
-
 import pygame
 import subprocess
 import os
 import sys
 from choose import play_song
 import sounddevice as sd
-import keyboard
+import RPi.GPIO as GPIO
 from datetime import datetime
 
 # 初始化 Pygame
 pygame.mixer.init()
+
+# 初始化 GPIO
+GPIO.setmode(GPIO.BCM)
+button_pins = [10,17,3,2] #重錄10 回放17 送出3 取消2
+for pin in button_pins:
+    GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 # 獲得選定的歌曲路徑
 selected_song = sys.argv[1]
@@ -31,42 +28,28 @@ pygame.mixer.music.play()
 
 previewing = True  # 用於追蹤是否正在預覽
 while previewing:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            previewing = False
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_r:
-                # 回到錄音
-                subprocess.Popen(["python3", "record.py", selected_song])
-                previewing = False
-            elif event.key == pygame.K_e:
-                subprocess.Popen(["python3", "export.py", mixed_filename])
-                # 導出錄音
-                previewing = False
-            elif event.key == pygame.K_p:
-                # replay
-                pygame.mixer.music.load(mixed_filename)
-                pygame.mixer.music.play()
-            elif event.key == pygame.K_1:
-                #回到選擇並回傳按鍵值給index
-                subprocess.Popen(["python3", "choose.py", "0"])
-                previewing = False
-            elif event.key == pygame.K_2:
-                subprocess.Popen(["python3", "choose.py", "1"])
-                # 選擇歌曲
-                previewing = False
-            elif event.key == pygame.K_3:
-                subprocess.Popen(["python3", "choose.py", "2"])
-                # 選擇歌曲
-                previewing = False
-            elif event.key == pygame.K_4:
-                subprocess.Popen(["python3", "choose.py", "3"])
-                # 選擇歌曲
-                previewing = False
-            elif event.key == pygame.K_5:
-                subprocess.Popen(["python3", "choose.py", "4"])
-                # 選擇歌曲
-                previewing = False
-            elif event.key == pygame.K_6:
-                subprocess.Popen(["python3", "choose.py", "5"])
-                previewing = False
+    if GPIO.input(button_pins[0]) == GPIO.LOW:
+        # 回到錄音
+        subprocess.Popen(["python3", "record.py", selected_song])
+        previewing = False
+    elif GPIO.input(button_pins[1]) == GPIO.LOW:
+        # 重錄
+        pygame.mixer.music.load(mixed_filename)
+        pygame.mixer.music.play()
+    elif GPIO.input(button_pins[2]) == GPIO.LOW:
+        # 送出
+        subprocess.Popen(["python3", "export.py", mixed_filename])
+        previewing = False
+    
+    elif GPIO.input(button_pins[3]) == GPIO.LOW:
+        # 取消
+        subprocess.Popen(["python3", "choose.py"])
+        previewing = False
+    
+    pygame.time.wait(100)  # 避免頻繁檢查按鈕狀態
+
+# 清理 GPIO
+GPIO.cleanup()
+
+# 關閉 Pygame
+pygame.quit()

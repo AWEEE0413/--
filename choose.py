@@ -10,14 +10,21 @@ pygame.mixer.init()
 
 # 設置資料夾路徑和歌曲列表
 music_folder = "./RECSOURCE"
-songs = os.listdir(music_folder)[:6]
+files = os.listdir(music_folder)
+# 过滤出以数字开头的文件名，并按数字排序
+songs = sorted([filename for filename in files if filename.startswith(tuple('0123456789'))])
+
+# 如果文件名是 01.mp3 到 06.mp3 形式，songs 现在应该是 ['01.mp3', '02.mp3', ..., '06.mp3']
+
+print(songs)
 selected_song_index = None
 selected_song = None
 song_selected = False  # 用於追蹤是否已經選擇了歌曲
 
 # GPIO 設置
 GPIO.setmode(GPIO.BCM)
-button_pins = [17, 18, 27, 22, 23, 24, 25]  # 根據實際接線情況調整
+#22七星潭06首 27三棧溪05首 17鯉魚山04首 4撒固兒03首 3石梯坪02首 2瑞穗01首 10錄音
+button_pins = [2,3,4,17,27,22,10]
 for pin in button_pins:
     GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 

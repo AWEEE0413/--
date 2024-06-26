@@ -15,7 +15,7 @@ pygame.mixer.init()
 
 # Initialize GPIO
 GPIO.setmode(GPIO.BCM)
-button_pins = [25]
+button_pins = [10]
 GPIO.setup(button_pins, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 # Set recording parameters
