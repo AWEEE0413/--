@@ -34,6 +34,12 @@ audio_in = alsaaudio.PCM(alsaaudio.PCM_CAPTURE, alsaaudio.PCM_NORMAL,
 selected_song = sys.argv[1]
 
 def start_recording():
+    '''
+    #Play the beginningmusic
+    pygame.mixer.music.load('beginning.mp3')
+    pygame.mixer.music.play()
+    time.sleep(3.1415926)
+    '''
     pygame.mixer.music.load(selected_song)
     pygame.mixer.music.play()
 
@@ -46,7 +52,12 @@ def start_recording():
 def save_recording():
     print("* 錄音結束...")
     pygame.mixer.music.stop()
-
+    '''
+    #Play the endingmusic
+    pygame.mixer.music.load('ending.mp3')
+    pygame.mixer.music.play()
+    time.sleep(3)
+    '''
     # Save recording as WAV file
     wav_output_folder = "output_wav"
     os.makedirs(wav_output_folder, exist_ok=True)

@@ -11,10 +11,7 @@ pygame.mixer.init()
 # 設置資料夾路徑和歌曲列表
 music_folder = "./RECSOURCE"
 files = os.listdir(music_folder)
-# 过滤出以数字开头的文件名，并按数字排序
 songs = sorted([filename for filename in files if filename.startswith(tuple('0123456789'))])
-
-# 如果文件名是 01.mp3 到 06.mp3 形式，songs 现在应该是 ['01.mp3', '02.mp3', ..., '06.mp3']
 
 print(songs)
 selected_song_index = None
@@ -48,12 +45,6 @@ def select_song(index):
 def main_loop():
     global song_selected
     running = True
-    index = 0  # 默认值
-
-    if len(sys.argv) > 1:
-        index = int(sys.argv[1])
-        select_song(index)
-        song_selected = True
 
     last_button_press_time = time.time()
     debounce_delay = 0.3  # 去抖動延遲 (秒)

@@ -5,7 +5,6 @@ import sys
 from choose import play_song
 import sounddevice as sd
 import RPi.GPIO as GPIO
-from datetime import datetime
 
 # 初始化 Pygame
 pygame.mixer.init()
@@ -33,11 +32,17 @@ while previewing:
         subprocess.Popen(["python3", "record.py", selected_song])
         previewing = False
     elif GPIO.input(button_pins[1]) == GPIO.LOW:
-        # 重錄
+        # 回放
         pygame.mixer.music.load(mixed_filename)
         pygame.mixer.music.play()
     elif GPIO.input(button_pins[2]) == GPIO.LOW:
         # 送出
+        '''
+        #Play the exportingmusic
+        pygame.mixer.music.load('exporting.mp3')
+        pygame.mixer.music.play()
+        time.sleep(3)
+        '''
         subprocess.Popen(["python3", "export.py", mixed_filename])
         previewing = False
     
@@ -50,6 +55,3 @@ while previewing:
 
 # 清理 GPIO
 GPIO.cleanup()
-
-# 關閉 Pygame
-pygame.quit()
