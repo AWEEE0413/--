@@ -9,7 +9,7 @@ import RPi.GPIO as GPIO
 pygame.mixer.init()
 
 # 設置資料夾路徑和歌曲列表
-music_folder = "./RECSOURCE"
+music_folder = "/home/treehole/--/RECSOURCE"
 files = os.listdir(music_folder)
 songs = sorted([filename for filename in files if filename.startswith(tuple('0123456789'))])
 
@@ -20,8 +20,15 @@ song_selected = False  # 用於追蹤是否已經選擇了歌曲
 
 # GPIO 設置
 GPIO.setmode(GPIO.BCM)
-#22七星潭06首 27三棧溪05首 17鯉魚山04首 4撒固兒03首 3石梯坪02首 2瑞穗01首 10錄音
-button_pins = [2,3,4,17,27,22,10]
+#14七星潭06首 18三棧溪05首 24鯉魚山04首 8撒固兒03首 1石梯坪02首 16瑞穗01首 2錄音
+button_pins = [14,18,24,8,1,16,2]
+led_pins = [15,23,25,7,12,20,3]
+# 設置 LED 為輸出
+for pin in led_pins:
+    GPIO.setup(pin, GPIO.OUT)
+    GPIO.output(pin, GPIO.HIGH)
+
+# 設置按鈕為輸入並啟用上拉電阻
 for pin in button_pins:
     GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
@@ -51,33 +58,33 @@ def main_loop():
 
     while running:
         current_time = time.time()
-        if GPIO.input(button_pins[0]) == GPIO.LOW and (current_time - last_button_press_time) > debounce_delay:
+        if GPIO.input(button_pins[5]) == GPIO.LOW and (current_time - last_button_press_time) > debounce_delay:
             index = 0
             select_song(index)
             last_button_press_time = current_time
-        if GPIO.input(button_pins[1]) == GPIO.LOW and (current_time - last_button_press_time) > debounce_delay:
+        if GPIO.input(button_pins[4]) == GPIO.LOW and (current_time - last_button_press_time) > debounce_delay:
             index = 1
             select_song(index)
             last_button_press_time = current_time
-        if GPIO.input(button_pins[2]) == GPIO.LOW and (current_time - last_button_press_time) > debounce_delay:
+        if GPIO.input(button_pins[3]) == GPIO.LOW and (current_time - last_button_press_time) > debounce_delay:
             index = 2
             select_song(index)
             last_button_press_time = current_time
-        if GPIO.input(button_pins[3]) == GPIO.LOW and (current_time - last_button_press_time) > debounce_delay:
+        if GPIO.input(button_pins[2]) == GPIO.LOW and (current_time - last_button_press_time) > debounce_delay:
             index = 3
             select_song(index)
             last_button_press_time = current_time
-        if GPIO.input(button_pins[4]) == GPIO.LOW and (current_time - last_button_press_time) > debounce_delay:
+        if GPIO.input(button_pins[1]) == GPIO.LOW and (current_time - last_button_press_time) > debounce_delay:
             index = 4
             select_song(index)
             last_button_press_time = current_time
-        if GPIO.input(button_pins[5]) == GPIO.LOW and (current_time - last_button_press_time) > debounce_delay:
+        if GPIO.input(button_pins[0]) == GPIO.LOW and (current_time - last_button_press_time) > debounce_delay:
             index = 5
             select_song(index)
             last_button_press_time = current_time
         if song_selected and GPIO.input(button_pins[6]) == GPIO.LOW and (current_time - last_button_press_time) > debounce_delay:
             print(selected_song)
-            subprocess.Popen(["python3", "record.py", selected_song])
+            subprocess.Popen(["python3", "/home/treehole/--/record.py", selected_song])
             running = False
             last_button_press_time = current_time
         

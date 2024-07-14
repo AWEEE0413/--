@@ -8,15 +8,27 @@ from pydub import AudioSegment
 import subprocess
 import RPi.GPIO as GPIO
 import time
+import threading
+
+# 切换到脚本所在目录
+script_dir = os.path.dirname(os.path.abspath(__file__))
+os.chdir(script_dir)
 
 # Initialize Pygame
 pygame.init()
 pygame.mixer.init()
 
+
 # Initialize GPIO
 GPIO.setmode(GPIO.BCM)
-button_pins = [10]
-GPIO.setup(button_pins, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+button_pins = [4]
+led_pins = [3, 17]  # 0: Recording, 1: Stop Recording
+
+for pin in button_pins:
+    GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
+for pin in led_pins:
+    GPIO.setup(pin, GPIO.OUT)
 
 # Set recording parameters
 device = 'plughw:3,0'
@@ -27,19 +39,25 @@ periodsize = 1024
 
 # Open audio stream for input
 audio_in = alsaaudio.PCM(alsaaudio.PCM_CAPTURE, alsaaudio.PCM_NORMAL,
-                         device=device ,channels=channels, rate=rate, format=format, periodsize=periodsize)
-
+                         device=device, channels=channels, rate=rate, format=format, periodsize=periodsize)
 
 # Get the selected song path from command line argument
 selected_song = sys.argv[1]
 
+def breathing_led(pin):
+    while not song_selected:
+        GPIO.output(pin, GPIO.HIGH)
+        time.sleep(0.5)
+        GPIO.output(pin, GPIO.LOW)
+        time.sleep(0.5)
+
 def start_recording():
-    '''
-    #Play the beginningmusic
-    pygame.mixer.music.load('beginning.mp3')
+    #撥放開始音效並等音效播完
+    pygame.mixer.music.load("/home/treehole/--/soundeffect/Tree Hole SFX_Start Recording2.mp3")
     pygame.mixer.music.play()
-    time.sleep(3.1415926)
-    '''
+    while pygame.mixer.music.get_busy():
+        time.sleep(0.1)
+    # Load selected song
     pygame.mixer.music.load(selected_song)
     pygame.mixer.music.play()
 
@@ -52,12 +70,11 @@ def start_recording():
 def save_recording():
     print("* 錄音結束...")
     pygame.mixer.music.stop()
-    '''
-    #Play the endingmusic
-    pygame.mixer.music.load('ending.mp3')
+
+    #撥放結束音效
+    pygame.mixer.music.load("/home/treehole/--/soundeffect/Tree Hole SFX_Submit.mp3")
     pygame.mixer.music.play()
-    time.sleep(3)
-    '''
+
     # Save recording as WAV file
     wav_output_folder = "output_wav"
     os.makedirs(wav_output_folder, exist_ok=True)
@@ -93,6 +110,13 @@ def main_loop():
     recording = True
     RECORD_SECONDS = 30
 
+    # 设置LED状态
+    GPIO.output(led_pins[1], GPIO.HIGH)  # 停止錄音键恒亮
+
+    # 开启录音键闪烁线程
+    breathing_thread = threading.Thread(target=breathing_led, args=(led_pins[0],))
+    breathing_thread.start()
+
     # 播放音樂
     start_recording()
 
@@ -101,9 +125,7 @@ def main_loop():
         elapsed_time = (current_time - start_time) / 1000
         print(f"錄音中... {elapsed_time:.2f} 秒")
 
-        if elapsed_time >= RECORD_SECONDS:
-            recording = False
-        if GPIO.input(button_pins[0]) == GPIO.LOW:
+        if elapsed_time >= RECORD_SECONDS or GPIO.input(button_pins[0]) == GPIO.LOW:
             recording = False
         
         length, data = audio_in.read()
@@ -114,12 +136,22 @@ def main_loop():
 
     save_recording()
     mixed_output_mp3_path = mix_audio()
-    subprocess.Popen(["python3", "preview.py", selected_song, mixed_output_mp3_path])
+    subprocess.Popen(["python3", os.path.join(script_dir, "preview.py"), selected_song, mixed_output_mp3_path])
+
+    # 关闭呼吸灯线程
+    global song_selected
+    song_selected = True
+    breathing_thread.join()
+
+    # 设置停止录音LED熄灭
+    GPIO.output(led_pins[1], GPIO.LOW)
 
     # Cleanup
     audio_in.close()
     GPIO.cleanup()
 
 if __name__ == "__main__":
+    global song_selected
+    song_selected = False
     main_loop()
     pygame.quit()
