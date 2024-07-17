@@ -21,8 +21,8 @@ pygame.mixer.init()
 
 # Initialize GPIO
 GPIO.setmode(GPIO.BCM)
-button_pins = [4]
-led_pins = [3, 17]  # 0: Recording, 1: Stop Recording
+button_pins = [16]
+led_pins = [20, 12]  # 0: Recording, 1: Stop Recording
 
 for pin in button_pins:
     GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)

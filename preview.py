@@ -15,8 +15,8 @@ pygame.mixer.init()
 
 # 初始化 GPIO
 GPIO.setmode(GPIO.BCM)
-button_pins = [27, 10, 11, 5]  # 回放27 重錄10  送出11 取消5
-led_pins = [22, 9, 0, 6]      # 对应LED引脚
+button_pins = [1, 8, 23, 15]  # 回放1 重錄10  送出23 取消15
+led_pins = [7, 25, 18, 14]      # 对应LED引脚
 
 for pin in button_pins:
     GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
@@ -25,9 +25,9 @@ for pin in led_pins:
     GPIO.setup(pin, GPIO.OUT)
 
 # 设置LED状态
-GPIO.output(led_pins[0], GPIO.HIGH)  # 重錄 LED 恆亮
-GPIO.output(led_pins[2], GPIO.HIGH)  # 送出 LED 恆亮
-GPIO.output(led_pins[3], GPIO.HIGH)  # 取消 LED 恆亮
+GPIO.output(led_pins[1], GPIO.LOW)  # 重錄 LED 恆亮
+GPIO.output(led_pins[2], GPIO.LOW)  # 送出 LED 恆亮
+GPIO.output(led_pins[3], GPIO.LOW)  # 取消 LED 恆亮
 
 # 获取选定的歌曲路径
 selected_song = sys.argv[1]
@@ -59,11 +59,17 @@ try:
             pygame.mixer.music.load(mixed_filename)
             pygame.mixer.music.play()
         elif GPIO.input(button_pins[1]) == GPIO.LOW:
-            # 回到录音
+            # 重錄
             subprocess.Popen(["python3", os.path.join(script_dir, "record.py"), selected_song])
             previewing = False
         elif GPIO.input(button_pins[2]) == GPIO.LOW:
             # 送出
+            #播放送出音效並等音效播完
+            pygame.mixer.music.load("/home/treehole/--/soundeffect/Tree Hole SFX_Export.mp3")
+            pygame.mixer.music.play()
+            while pygame.mixer.music.get_busy():
+                time.sleep(0.1)
+            # 保存混音后的音频文件
             subprocess.Popen(["python3", os.path.join(script_dir, "export.py"), mixed_filename])
             previewing = False
         elif GPIO.input(button_pins[3]) == GPIO.LOW:
