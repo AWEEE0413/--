@@ -46,7 +46,7 @@
 
 ## 最終完工圖
 
-![完工圖](https://drive.google.com/uc?export=view&id=1hm3WPWJ76oYt4k18GBTLhGKZbP7BDrUB)
+![完工圖](https://drive.google.com/file/d/1hm3WPWJ76oYt4k18GBTLhGKZbP7BDrUB/view)
 
 ---
 
@@ -98,4 +98,4 @@ These scripts pass data through command-line arguments:
 
 ## Final Product Image
 
-![Final Product Image](https://drive.google.com/uc?export=view&id=1hm3WPWJ76oYt4k18GBTLhGKZbP7BDrUB)
+![Final Product Image](https://drive.google.com/file/d/1hm3WPWJ76oYt4k18GBTLhGKZbP7BDrUB/view)
