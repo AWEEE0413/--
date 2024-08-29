@@ -44,9 +44,6 @@
 
     可以使用 `crontab` 或其他自動運行工具設置開機自動運行。
 
-## 最終完工圖
-
-![完工圖](https://drive.google.com/file/d/1hm3WPWJ76oYt4k18GBTLhGKZbP7BDrUB/view)
 
 ---
 
@@ -96,6 +93,3 @@ These scripts pass data through command-line arguments:
 
     You can set up the script to run automatically at boot using `crontab` or other automation tools.
 
-## Final Product Image
-
-![Final Product Image](https://drive.google.com/file/d/1hm3WPWJ76oYt4k18GBTLhGKZbP7BDrUB/view)
