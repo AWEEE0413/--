@@ -1,86 +1,31 @@
 import os
-import subprocess
 import sys
-import time
-import threading
-import pygame
-import RPi.GPIO as GPIO
+import serial
 
-# 切换到脚本所在目录
-script_dir = os.path.dirname(os.path.abspath(__file__))
-os.chdir(script_dir)
+# 初始化 Arduino 通訊
+arduino = serial.Serial('COM3', 9600, timeout=1)
+time.sleep(2)
 
-# 初始化 Pygame
-pygame.mixer.init()
-
-# 初始化 GPIO
-GPIO.setmode(GPIO.BCM)
-button_pins = [1, 8, 23, 15]  # 回放1 重錄10  送出23 取消15
-led_pins = [7, 25, 18, 14]      # 对应LED引脚
-
-for pin in button_pins:
-    GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-
-for pin in led_pins:
-    GPIO.setup(pin, GPIO.OUT)
-
-# 设置LED状态
-GPIO.output(led_pins[1], GPIO.LOW)  # 重錄 LED 恆亮
-GPIO.output(led_pins[2], GPIO.LOW)  # 送出 LED 恆亮
-GPIO.output(led_pins[3], GPIO.LOW)  # 取消 LED 恆亮
-
-# 获取选定的歌曲路径
 selected_song = sys.argv[1]
-
-# 获取混音后的音频文件
 mixed_filename = sys.argv[2]
 
-# 播放混音后的音频文件
-pygame.mixer.music.load(mixed_filename)
-pygame.mixer.music.play()
+# 播放音效
+def play_audio(file):
+    os.system(f"mpg123 {file}")
 
-# 定义回放 LED 闪烁函数
-def flash_led(pin):
-    while previewing:
-        GPIO.output(pin, GPIO.HIGH)
-        time.sleep(0.5)
-        GPIO.output(pin, GPIO.LOW)
-        time.sleep(0.5)
-
-# 启动回放 LED 闪烁线程
-previewing = True
-flash_thread = threading.Thread(target=flash_led, args=(led_pins[0],))
-flash_thread.start()
-
-try:
-    while previewing:
-        if GPIO.input(button_pins[0]) == GPIO.LOW:
-            # 回放
-            pygame.mixer.music.load(mixed_filename)
-            pygame.mixer.music.play()
-        elif GPIO.input(button_pins[1]) == GPIO.LOW:
-            # 重錄
-            subprocess.Popen(["python3", os.path.join(script_dir, "record.py"), selected_song])
-            previewing = False
-        elif GPIO.input(button_pins[2]) == GPIO.LOW:
-            # 送出
-            #播放送出音效並等音效播完
-            pygame.mixer.music.load("/home/treehole/--/soundeffect/Tree Hole SFX_Export.mp3")
-            pygame.mixer.music.play()
-            while pygame.mixer.music.get_busy():
-                time.sleep(0.1)
-            # 保存混音后的音频文件
-            subprocess.Popen(["python3", os.path.join(script_dir, "export.py"), mixed_filename])
-            previewing = False
-        elif GPIO.input(button_pins[3]) == GPIO.LOW:
-            # 取消
-            subprocess.Popen(["python3", os.path.join(script_dir, "choose.py")])
-            previewing = False
-        
-        time.sleep(0.1)  # 避免频繁检查按钮状态
-
-finally:
-    # 确保清理 GPIO 和停止闪烁线程
-    previewing = False
-    flash_thread.join()
-    GPIO.cleanup()
+# 主程式
+if __name__ == "__main__":
+    print("Previewing audio...")
+    play_audio(mixed_filename)
+    while True:
+        if arduino.in_waiting > 0:
+            command = arduino.readline().decode().strip()
+            if command == "RETRY":
+                os.system(f"python3 record.py {selected_song}")
+                break
+            elif command == "EXPORT":
+                os.system(f"python3 export.py {mixed_filename}")
+                break
+            elif command == "CANCEL":
+                os.system("python3 choose.py")
+                break
